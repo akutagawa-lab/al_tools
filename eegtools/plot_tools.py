@@ -1,4 +1,5 @@
-
+''' グラフ描画関連の関数
+'''
 from pathlib import Path
 
 import numpy as np
@@ -20,13 +21,40 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
             'ylim' (list) : y軸の範囲 (最小値，最大値)
             'ylabel' (str) : y軸のラベル
             'toffset' (float) : 時間軸のオフセット
-            'tcol' (str) : df の時間が格納されたカラム
+            'tcol' (str) : df の時間が格納されたカラム。デフォルトは'SECONDS'
         figfile (str): 出力ファイル名
         xlim (list): 描画範囲 (from, to)
         figsize (list): グラフサイズ (width, height)
         xlabel (str): 横軸のラベル
         lw (float): 線の太さ
         dpi (float): DPI
+
+    Examples:
+        
+        import eegtools
+
+        eegtools.plot_multi_dat([
+                    { 'df': df_eeg,
+                      'cols': [' Fp1', ' Fp2'],
+                      'ylim': [-100, 100],
+                      'ylabel': '[uV]',
+                      'tcol': 'time' },
+                    { 'df': df_audio,
+                      'cols': ['left', 'right'],
+                      'ylabel': '[au]',
+                      'tcol': 'sec' }
+                 ],
+                 figfile='subject-1.pdf',
+                 xlim=[5, 10])
+
+        df_eeg と df_audio の2つのpd.DataFrameを使ってグラフを描く。
+        df_eeg からは時間が'time'，振幅が' Fp1'と' Fp2'で2枚のグラフを描く
+        y軸の範囲は-100から100。
+        df_audio からは時間が'sec'，振幅が'left'と'right'の2枚のグラフを描く
+        y軸の範囲は自動
+        合計4枚のグラフで横軸は5から10秒。
+        また 'subject-1.pdf' というPDFファイルを出力する。
+        ここで，'subject-1.png' とすると PNG ファイルを出力できる。
     '''
 
     n_plots = 0
@@ -60,6 +88,8 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
             plot_idx += 1
 
     ax[n_plots-1].set_xlabel(xlabel)
+
+    plt.show()
 
     if figfile is not None:
         plt.savefig(figfile, dpi=dpi)
