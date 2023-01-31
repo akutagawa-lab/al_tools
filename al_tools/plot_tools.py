@@ -22,21 +22,47 @@ class plotParameters():
         self.toffset = toffset
 
     def set_unit(self, unit):
+        '''単位の設定
+
+        Args:
+            unit (str): 単位．デフォルトはNone
+        '''
         self.unit = unit
 
     def set_xlim(self, xlim):
+        '''未使用'''
         self.xlim = xlim
 
     def set_ylim(self, ylim):
+        '''y軸の範囲
+
+        Args:
+            ylim (list): (min, max) デフォルトはNone
+        '''
         self.ylim = ylim
 
     def set_ylabel(self, ylabel):
+        '''y軸のラベル
+
+        Args:
+            ylabel (str): y軸のラベル．デフォルトはNone
+        '''
         self.ylabel = ylabel
 
     def set_alias(self, alias):
+        '''キーの別名．legendに使われる．
+
+        Args:
+            alias (str): キーの別名．デフォルトはNone
+        '''
         self.alias = alias
 
     def set_toffset(self, toffset):
+        '''時間のオフセット
+
+        Args:
+            toffset (str): 時間軸のオフセット．デフォルトは0
+        '''
         self.toffset = toffset
 
 
@@ -44,8 +70,6 @@ class plotData(plotParameters):
     '''グラフ描画用のデータコンテナ
 
     時間軸が共通な複数チャネルの時系列
-
-    STUBです。まだ使えません。
     '''
 
     def __init__(self, df, tcol='time', **kwargs):
@@ -57,20 +81,51 @@ class plotData(plotParameters):
         self.params = {}
         self.plot_columns = []
 
-    def __getitem__(self, k):
-        if k not in self.params:
-            self.params[k] = plotParameters()
-        return self.params[k]
+    def __getitem__(self, key):
+        '''keyで指定されるplotParameterへのアクセス
 
-    def __setitem__(self, k, val):
-        if k not in self.params:
-            self.params[k] = plotParameters()
-        self.params[k] = val
+        Args:
+            key (str): キー（DataFrameのカラム名に相当）
+
+        Return:
+            self.params[key]
+
+        Example:
+            pld = al_tools.plot_tools.plotData(df)
+            pld['ch_1'].set_unit('uV')
+            print(pld['ch_1'].unit)
+        '''
+
+        if key not in self.params:
+            self.params[key] = plotParameters()
+        return self.params[key]
+
+    def __setitem__(self, key, val):
+        '''keyで指定されるplotParameterの設定
+        これいらない？
+
+        Args:
+            key (str): キー（DataFrameのカラム名に相当）
+            val (any): 値
+        '''
+        if key not in self.params:
+            self.params[key] = plotParameters()
+        self.params[key] = val
 
     def keys(self):
+        '''プロットパラメータのキーのリストを返す
+
+        Return:
+            (list) : キーのリスト
+        '''
         return self.params.keys()
 
     def set_plot_columns(self, cols):
+        '''グラフ描画するカラムのリストを指定
+
+        Args:
+            cols (list of str): カラム名のリスト
+        '''
         self.plot_columns = cols
 
 
