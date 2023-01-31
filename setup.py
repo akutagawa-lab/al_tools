@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-        name='eegtools',
+        name='al_tools',
         version='0.1',
-        description="various eeg tools",
-        long_description="",
+        description="Various tools in Akutagawa Lab.",
+        long_description="about EEG, ... etc.",
         author="makutaga",
         license="MIT",
         classifiers=[
