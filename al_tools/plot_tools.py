@@ -7,7 +7,40 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-class plotData():
+class plotParameters():
+    '''グラフのパラメータ
+    '''
+    def __init__(self, unit=None, xlim=None, ylim=None, ylabel=None,
+                 alias=None, toffset=0.0):
+        # print("plotParameters():__init__: ", end=None)
+        # print(f"unit:{unit} xlim:{xlim} ylim:{ylim} ylabel:{ylabel}")
+        self.unit = unit
+        self.xlim = xlim
+        self.ylim = ylim
+        self.ylabel = ylabel
+        self.alias = alias
+        self.toffset = toffset
+
+    def set_unit(self, unit):
+        self.unit = unit
+
+    def set_xlim(self, xlim):
+        self.xlim = xlim
+
+    def set_ylim(self, ylim):
+        self.ylim = ylim
+
+    def set_ylabel(self, ylabel):
+        self.ylabel = ylabel
+
+    def set_alias(self, alias):
+        self.alias = alias
+
+    def set_toffset(self, toffset):
+        self.toffset = toffset
+
+
+class plotData(plotParameters):
     '''グラフ描画用のデータコンテナ
 
     時間軸が共通な複数チャネルの時系列
@@ -15,9 +48,148 @@ class plotData():
     STUBです。まだ使えません。
     '''
 
-    def __init__(self, df):
+    def __init__(self, df, tcol='time', **kwargs):
+        # print("plotData():__init__")
+        super().__init__(**kwargs)
         self.df = df
+        self.tcol = tcol
 
+        self.params = {}
+        self.plot_columns = []
+
+    def __getitem__(self, k):
+        if k not in self.params:
+            self.params[k] = plotParameters()
+        return self.params[k]
+
+    def __setitem__(self, k, val):
+        if k not in self.params:
+            self.params[k] = plotParameters()
+        self.params[k] = val
+
+    def keys(self):
+        return self.params.keys()
+
+    def set_plot_columns(self, cols):
+        self.plot_columns = cols
+
+
+def plot_multi_dat2(pld_set, figfile=None, xlim=(0, 50),
+                    figsize=(8, 6),
+                    xlabel='time [s]',
+                    lw=1,
+                    dpi=300,
+                    show=False):
+    ''' 複数の時間軸を持つDataFrameのプロット
+
+    Args:
+        df_set (list of plotData):
+            グラフを描くデータのリスト。plotData のリスト
+        figfile (str): 出力ファイル名
+        xlim (list): 描画範囲 (from, to)
+        figsize (list): グラフサイズ (width, height)
+        xlabel (str): 横軸のラベル
+        lw (float): 線の太さ
+        dpi (float): DPI
+
+    Examples:
+        
+        import eegtools
+
+        eegtools.plot_multi_dat([
+                    { 'df': df_eeg,
+                      'cols': [' Fp1', ' Fp2', 'SNS'],
+                      'ylim': [-100, 100],
+                      'ylabel': '[uV]',
+                      'tcol': 'time',
+                      'keymap': {'SNS': 'Sensor signal'} },
+                    { 'df': df_audio,
+                      'cols': ['left', 'right'],
+                      'ylabel': '[au]',
+                      'tcol': 'sec' }
+                 ],
+                 figfile='subject-1.pdf',
+                 xlim=[5, 10])
+
+        df_eeg と df_audio の2つのpd.DataFrameを使ってグラフを描く。
+        df_eeg からは時間が'time'，振幅が' Fp1'，' Fp2'，'SNS'の
+        3枚のグラフを描く。
+        y軸の範囲は-100から100。
+        凡例はそれぞれ' Fp1'，' Fp2', 'Sensor signal'
+        （'SNS'はkeymapの指定で置き換えられる）
+
+        df_audio からは時間が'sec'，振幅が'left'と'right'の2枚のグラフを描く
+        y軸の範囲は自動
+        合計4枚のグラフで横軸は5から10秒。
+        また 'subject-1.pdf' というPDFファイルを出力する。
+        ここで，'subject-1.png' とすると PNG ファイルを出力できる。
+    '''
+
+    n_plots = 0
+    for pld in pld_set:
+        n_plots = n_plots + len(pld.plot_columns)
+
+    '''
+
+    for i in range(len(df_set)):
+
+        if 'ylabel' not in df_set[i]:
+            df_set[i]['ylabel'] = '[uV]'
+        if 'toffset' not in df_set[i]:
+            df_set[i]['toffset'] = 0.0
+        if 'tcol' not in df_set[i]:
+            df_set[i]['tcol'] = 'SECONDS'
+        if 'keymap' not in df_set[i]:
+            df_set[i]['keymap'] = {}
+    '''
+
+    print(f"{n_plots} plots")
+
+    plt.rcParams["figure.figsize"] = figsize
+    fig, ax = plt.subplots(n_plots, 1, layout=None, sharex=True)
+    plt.subplots_adjust(wspace=.0, hspace=0.0001)
+    plot_idx = 0
+
+    for pld in pld_set:
+        tim = pld.df[pld.tcol] - pld.toffset
+        for c in pld.plot_columns:
+            if pld[c].alias is not None:
+                label = pld[c].alias
+            else:
+                label = c
+            if pld[c].ylabel is not None:
+                ylabel = pld[c].ylabel
+            elif pld[c].unit is not None:
+                ylabel = f'[{pld[c].unit}]'
+            else:
+                ylabel = pld.ylabel
+            ax[plot_idx].plot(tim, pld.df[c], label=label, lw=lw)
+            ax[plot_idx].set_ylabel(ylabel)
+            if pld[c].ylim is not None:
+                ax[plot_idx].set_ylim(pld[c].ylim)
+            elif pld.ylim is not None:
+                ax[plot_idx].set_ylim(pld.ylim)
+
+            if xlim is not None:
+                ax[plot_idx].set_xlim(xlim[0], xlim[1])
+                ax[plot_idx].annotate(label, (1, 0.5),
+                                      xycoords='axes fraction',
+                                      verticalalignment='center')
+#             ax[plot_idx].legend(bbox_to_anchor=(1.00, 1),
+#                                 loc='upper left',
+#                                 borderaxespad=0,
+#                                 fontsize=9)
+            plot_idx += 1
+
+    ax[n_plots-1].set_xlabel(xlabel)
+
+    if show is True:
+        plt.show()
+
+    if figfile is not None:
+        plt.savefig(figfile, dpi=dpi)
+
+    return fig, ax
 
 def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
                    figsize=(8, 6),
@@ -120,7 +292,7 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
 
     ax[n_plots-1].set_xlabel(xlabel)
 
-    plt.show()
+    #plt.show()
 
     if figfile is not None:
         plt.savefig(figfile, dpi=dpi)
