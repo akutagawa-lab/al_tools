@@ -1,4 +1,4 @@
-# eegtools
+# al_tools
 
 ## インストール
 以下のいずれかにより適切な方法を選ぶ
@@ -8,7 +8,7 @@
 ### 1. コードを変更しない場合
 GitHubから`pip`を使って直接インストールする。
 ```Shell
-pip install git+https://github.com/makutaga/eegtools.git
+pip install git+https://github.com/makutaga/al_tools.git
 ```
 
 ### 2. コードを変更する可能性がある場合
@@ -17,16 +17,16 @@ pip install git+https://github.com/makutaga/eegtools.git
 
 まずパッケージをGitHubから取得する。パッケージファイルを置いておくディレクトリで以下を実行する。
 ```
-git clone https://github.com/makutaga/eegtools.git
+git clone https://github.com/makutaga/al_tools.git
 ```
 
-カレントディレクトリ直下に以下のように```eegtools```というディレクトリが作成される。
+カレントディレクトリ直下に以下のように`al_tools`というディレクトリが作成される。
 ```
-eegtools
+al_tools
 ├── LICENSE
 ├── README.md
-├── eegtools
-│   ├── __init__.py
+├── al_tools
+│   ├── __init__.py
 │   ├── plot_tools.py
 │   └── utils.py
 └── setup.py
@@ -35,7 +35,7 @@ eegtools
 
 `pip` を使ってeditable modeでインストール
 ```Shell
-pip install -e eegtools
+pip install -e al_tools
 ```
 
 ## パッケージファイルの更新
@@ -44,11 +44,11 @@ GitHubに置いてあるパッケージファイルが更新された場合，�
 ### GitHubから直接インストールした場合
 他の`pip`のパッケージと同様，以下で更新できる
 ```Shell
-pip install -U eegtools
+pip install -U git+https://github.com/makutaga/al_tools.git
 ```
 
 ### Editable modeでインストールした場合
-`eegtools`を展開したディレクトリ内で，`git pull` で更新内容を取得する。
+`al_tools`を展開したディレクトリ内で，`git pull` で更新内容を取得する。
 ```Shell
 git pull
 ```
@@ -57,7 +57,7 @@ git pull
 ## ドキュメント
 docstringから生成されるドキュメントを以下で読める。
 ```Shell
-pydoc eegtools
-pydoc eegtools.utils
-pydoc eegtools.plot_tools
+pydoc al_tools
+pydoc al_tools.utils
+pydoc al_tools.plot_tools
 ```
