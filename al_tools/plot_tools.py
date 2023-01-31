@@ -6,6 +6,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
+class plotData():
+    '''グラフ描画用のデータコンテナ
+
+    時間軸が共通な複数チャネルの時系列
+
+    STUBです。まだ使えません。
+    '''
+
+    def __init__(self, df):
+        self.df = df
+
+
 def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
                    figsize=(8, 6),
                    xlabel='time [s]',
@@ -22,6 +35,7 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
             'ylabel' (str) : y軸のラベル
             'toffset' (float) : 時間軸のオフセット
             'tcol' (str) : df の時間が格納されたカラム。デフォルトは'SECONDS'
+            'keymap' (dict) : カラム名から凡例表示用テキストへのマップ
         figfile (str): 出力ファイル名
         xlim (list): 描画範囲 (from, to)
         figsize (list): グラフサイズ (width, height)
@@ -35,10 +49,11 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
 
         eegtools.plot_multi_dat([
                     { 'df': df_eeg,
-                      'cols': [' Fp1', ' Fp2'],
+                      'cols': [' Fp1', ' Fp2', 'SNS'],
                       'ylim': [-100, 100],
                       'ylabel': '[uV]',
-                      'tcol': 'time' },
+                      'tcol': 'time',
+                      'keymap': {'SNS': 'Sensor signal'} },
                     { 'df': df_audio,
                       'cols': ['left', 'right'],
                       'ylabel': '[au]',
@@ -48,8 +63,12 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
                  xlim=[5, 10])
 
         df_eeg と df_audio の2つのpd.DataFrameを使ってグラフを描く。
-        df_eeg からは時間が'time'，振幅が' Fp1'と' Fp2'で2枚のグラフを描く
+        df_eeg からは時間が'time'，振幅が' Fp1'，' Fp2'，'SNS'の
+        3枚のグラフを描く。
         y軸の範囲は-100から100。
+        凡例はそれぞれ' Fp1'，' Fp2', 'Sensor signal'
+        （'SNS'はkeymapの指定で置き換えられる）
+
         df_audio からは時間が'sec'，振幅が'left'と'right'の2枚のグラフを描く
         y軸の範囲は自動
         合計4枚のグラフで横軸は5から10秒。
@@ -67,6 +86,8 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
             df_set[i]['toffset'] = 0.0
         if 'tcol' not in df_set[i]:
             df_set[i]['tcol'] = 'SECONDS'
+        if 'keymap' not in df_set[i]:
+            df_set[i]['keymap'] = {}
 
     print(f"{n_plots} plots")
 
@@ -78,13 +99,23 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
     for a_set in df_set:
         tim = a_set['df'][a_set['tcol']] - a_set['toffset']
         for c in a_set['cols']:
-            ax[plot_idx].plot(tim, a_set['df'][c], label=c, lw=lw)
+            if c in a_set['keymap']:
+                label = a_set['keymap'][c]
+            else:
+                label = c
+            ax[plot_idx].plot(tim, a_set['df'][c], label=label, lw=lw)
             ax[plot_idx].set_ylabel(a_set['ylabel'])
             if 'ylim' in a_set:
                 ax[plot_idx].set_ylim(a_set['ylim'][0], a_set['ylim'][1])
             if xlim is not None:
                 ax[plot_idx].set_xlim(xlim[0], xlim[1])
-            ax[plot_idx].legend(bbox_to_anchor=(1.00, 1), loc='upper left', borderaxespad=0, fontsize=9)
+                ax[plot_idx].annotate(label, (1, 0.5),
+                                      xycoords='axes fraction',
+                                      verticalalignment='center')
+#             ax[plot_idx].legend(bbox_to_anchor=(1.00, 1),
+#                                 loc='upper left',
+#                                 borderaxespad=0,
+#                                 fontsize=9)
             plot_idx += 1
 
     ax[n_plots-1].set_xlabel(xlabel)
@@ -93,3 +124,5 @@ def plot_multi_dat(df_set, figfile=None, xlim=(0, 50),
 
     if figfile is not None:
         plt.savefig(figfile, dpi=dpi)
+
+    return fig, ax
