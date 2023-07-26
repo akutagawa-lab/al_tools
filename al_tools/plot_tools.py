@@ -128,6 +128,13 @@ class plotData(plotParameters):
         '''
         self.plot_columns = cols
 
+    def set_tcol(self, tcol='time'):
+        '''時間を表すカラム名を指定する
+
+        Args:
+            tcol (str): 時間を表すカラム
+        '''
+        self.tcol = tcol
 
 def plot_multi_dat2(pld_set, figfile=None, xlim=(0, 50),
                     figsize=(8, 6),
