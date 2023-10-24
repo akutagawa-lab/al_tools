@@ -141,6 +141,7 @@ def plot_multi_dat2(pld_set, figfile=None, xlim=(0, 50),
                     xlabel='time [s]',
                     lw=1,
                     dpi=300,
+                    axis_off=False,
                     show=False):
     ''' 複数の時間軸を持つDataFrameのプロット
 
@@ -153,6 +154,7 @@ def plot_multi_dat2(pld_set, figfile=None, xlim=(0, 50),
         xlabel (str): 横軸のラベル
         lw (float): 線の太さ
         dpi (float): DPI
+        axis_off (bool): 枠，軸，ラベルを表示しない
 
     Examples:
         
@@ -237,6 +239,8 @@ def plot_multi_dat2(pld_set, figfile=None, xlim=(0, 50),
                 ax[plot_idx].annotate(label, (1, 0.5),
                                       xycoords='axes fraction',
                                       verticalalignment='center')
+            if axis_off is True:
+                ax[plot_idx].set_axis_off()
 #             ax[plot_idx].legend(bbox_to_anchor=(1.00, 1),
 #                                 loc='upper left',
 #                                 borderaxespad=0,
